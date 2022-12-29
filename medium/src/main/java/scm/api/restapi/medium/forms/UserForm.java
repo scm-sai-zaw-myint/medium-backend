@@ -3,6 +3,7 @@ package scm.api.restapi.medium.forms;
 import java.util.Date;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.multipart.MultipartFile;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,6 +26,8 @@ public class UserForm {
     private String bio;
 
     private String password;
+    
+    private MultipartFile profile;
 
     private Date createdAt;
 

@@ -2,6 +2,7 @@ package scm.api.restapi.medium.persistence.entiry;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -13,6 +14,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,16 +35,25 @@ public class Users implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     
-    @Column
+    @Column(length = 50)
     private String name;
 
-    @Column
+    @Column(length = 50)
     private String email;
 
-    @Column
+    @Column(length = 100)
     private String bio;
 
-    @Column
+    @Column(nullable = true, length = 100)
+    private String profile;
+    
+    @OneToMany(mappedBy = "user")
+    private Set<Posts> posts;
+    
+    @OneToMany(mappedBy = "user")
+    private Set<Comments> comments;
+    
+    @Column(length = 16)
     private String password;
     
     @Column(name = "created_at")
