@@ -1,5 +1,6 @@
 package scm.api.restapi.medium.service.impl;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,8 +13,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+import scm.api.restapi.medium.common.PropertyUtil;
 import scm.api.restapi.medium.common.Response;
 import scm.api.restapi.medium.forms.UserForm;
 import scm.api.restapi.medium.forms.reponse.AuthResponseForm;
@@ -23,6 +28,7 @@ import scm.api.restapi.medium.persistence.entiry.Users;
 import scm.api.restapi.medium.persistence.repo.UsersRepo;
 import scm.api.restapi.medium.service.AuthService;
 
+@Transactional
 @Service
 public class AuthServiceImpl implements AuthService{
 
@@ -38,10 +44,16 @@ public class AuthServiceImpl implements AuthService{
     @Value("${app.jwt.validity}")
     private long EXPIRE_DURATION;
     
+    @Value("${image.upload-dir}")
+    private String fileStorageDIR;
+    
+    @Autowired
+    PropertyUtil propertyUtil;
+    
     @Override
     public ResponseEntity<?> login(AuthRequestForm form, String access_token) {
-        if(form == null) return  Response.send(HttpStatus.BAD_REQUEST, false, "Request body required!", null);
-        if(form.getEmail() == null || form.getPassword() == null) return Response.send(HttpStatus.BAD_REQUEST, false, "Email or password required!", null);
+        if(form == null) return  Response.send(HttpStatus.BAD_REQUEST, false, "Request body required!", null, null);
+        if(form.getEmail() == null || form.getPassword() == null) return Response.send(HttpStatus.BAD_REQUEST, false, "Email or password required!", null, null);
         try {
             Authentication authentication = authManager
                     .authenticate(new UsernamePasswordAuthenticationToken(form.getEmail(), form.getPassword()));
@@ -49,27 +61,44 @@ public class AuthServiceImpl implements AuthService{
             Users user = (Users) authentication.getPrincipal();
             String accessToken = jwtUtil.generateAccessToken(user);
             AuthResponseForm response = new AuthResponseForm(user.getEmail(), accessToken,new Date(System.currentTimeMillis() + (EXPIRE_DURATION * 60) * 1000));
-            return Response.send(HttpStatus.ACCEPTED, true, "Login success!", response);
+            return Response.send(HttpStatus.ACCEPTED, true, "Login success!", response, null);
 
         } catch (BadCredentialsException ex) {
             ex.printStackTrace();
             Map<String, Object> error = new HashMap<>();
             error.put("error", ex.getMessage());
-            return Response.send(HttpStatus.BAD_REQUEST, false, "Login fail!",error);
+            return Response.send(HttpStatus.BAD_REQUEST, false, "Login fail!",error, null);
         }
     }
 
     @Override
     public ResponseEntity<?> registration(UserForm form, String access_token) {
+        if(form.getProfile() != null) {
+            try {
+                form.setProfileURL(this.propertyUtil.uploadPhotorequest(form.getProfile(), form.getEmail(), true));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return Response.send(HttpStatus.INTERNAL_SERVER_ERROR, false, e.getMessage(), e, null);
+            }
+        }
         Users user = new Users(form);
-        
         try {
             Users savedUser = usersRepo.save(user);
-            return Response.send(HttpStatus.CREATED,true, "Registration success!",savedUser);
+            return Response.send(HttpStatus.CREATED,true, "Registration success!",savedUser, null);
         } catch (Exception e) {
             e.printStackTrace();
-            return Response.send(HttpStatus.BAD_REQUEST, false, e.getMessage(), e);
+            return Response.send(HttpStatus.BAD_REQUEST, false, e.getMessage(), e, null);
         }
+    }
+    
+    @SuppressWarnings("deprecation")
+    @Override
+    public Users authUser(String token) {
+        UserDetails userDetails = token == null
+                ? (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()
+                : this.jwtUtil.getUserDetails(token);
+        
+        return this.usersRepo.getById(((Users) userDetails).getId());
     }
 
 }

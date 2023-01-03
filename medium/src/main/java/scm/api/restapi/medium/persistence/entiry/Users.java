@@ -2,6 +2,7 @@ package scm.api.restapi.medium.persistence.entiry;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,10 +37,10 @@ public class Users implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     
-    @Column(length = 50)
+    @Column(length = 50, unique = true)
     private String name;
 
-    @Column(length = 50)
+    @Column(length = 50, unique = true)
     private String email;
 
     @Column(length = 100)
@@ -47,13 +49,13 @@ public class Users implements UserDetails {
     @Column(nullable = true, length = 100)
     private String profile;
     
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private Set<Posts> posts;
     
     @OneToMany(mappedBy = "user")
     private Set<Comments> comments;
     
-    @Column(length = 16)
+    @Column(length = 100)
     private String password;
     
     @Column(name = "created_at")
@@ -102,8 +104,12 @@ public class Users implements UserDetails {
         this.name = form.getName();
         this.email = form.getEmail();
         this.bio = form.getBio();
+        this.profile = form.getProfileURL();
         this.password = form.getPassword();
     }
 
+    public void addPost(Posts post) {
+        this.posts.add(post);
+    }
     
 }

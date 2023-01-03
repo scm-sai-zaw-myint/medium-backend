@@ -7,12 +7,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import scm.api.restapi.medium.persistence.entiry.Users;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+@Data
 public class UserForm {
 
     final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -29,6 +33,8 @@ public class UserForm {
     
     private MultipartFile profile;
 
+    String profileURL;
+
     private Date createdAt;
 
     private Date updatedAt;
@@ -39,6 +45,7 @@ public class UserForm {
         this.email = user.getEmail();
         this.password = user.getPassword();
         this.bio = user.getBio();
+        this.profileURL = user.getProfile();
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
     }
