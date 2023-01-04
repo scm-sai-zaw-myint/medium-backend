@@ -1,4 +1,4 @@
-package scm.api.restapi.medium.service.impl;
+package scm.api.restapi.medium.bl.service.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,18 +14,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import scm.api.restapi.medium.bl.service.AuthService;
+import scm.api.restapi.medium.bl.service.CommentService;
+import scm.api.restapi.medium.bl.service.PostService;
 import scm.api.restapi.medium.common.PropertyUtil;
 import scm.api.restapi.medium.common.Response;
 import scm.api.restapi.medium.forms.CategoriesForm;
 import scm.api.restapi.medium.forms.PostForm;
+import scm.api.restapi.medium.forms.reponse.CommentResponse;
 import scm.api.restapi.medium.forms.reponse.PostResponse;
 import scm.api.restapi.medium.persistence.entiry.Categories;
+import scm.api.restapi.medium.persistence.entiry.Comments;
 import scm.api.restapi.medium.persistence.entiry.Posts;
 import scm.api.restapi.medium.persistence.entiry.Users;
 import scm.api.restapi.medium.persistence.repo.CategoriesRepo;
 import scm.api.restapi.medium.persistence.repo.PostsRepo;
-import scm.api.restapi.medium.service.AuthService;
-import scm.api.restapi.medium.service.PostService;
 
 @Transactional
 @Service
@@ -41,6 +44,9 @@ public class PostServiceImpl implements PostService{
     AuthService authService;
     
     @Autowired
+    CommentService commentService;
+    
+    @Autowired
     PropertyUtil propertyUtil;
     
     @Value("${image.upload-dir}")
@@ -52,7 +58,6 @@ public class PostServiceImpl implements PostService{
         if(!this.valideForm(form)) {
             return Response.send(HttpStatus.BAD_REQUEST, false, "Missing required fields!",null, null);
         }
-        
         if(form.getImage() != null ) {
             try {
                 form.setImageURL(this.propertyUtil.uploadPhotorequest(form.getImage(), form.getTitle(), false));
@@ -63,8 +68,8 @@ public class PostServiceImpl implements PostService{
         
         Posts post = new Posts(form);
         Set<Categories> categories = new HashSet<>();
-        if(form.getCategoriesLists() != null) {
-            List<Object> ints =  (List<Object>) this.propertyUtil.convertStringToList(form.getCategoriesLists(), ",");
+        if(form.getCategories() != null) {
+            List<Object> ints =  (List<Object>) this.propertyUtil.convertStringToList(form.getCategories(), ",");
             for(Object cid: ints) {
                 Integer cateId = cid instanceof String ? Integer.parseInt((String) cid) : cid instanceof Integer ? (Integer) cid :  (Integer) cid;
                 Categories cat = this.categoriesRepo.getById(cateId);
@@ -77,6 +82,7 @@ public class PostServiceImpl implements PostService{
         Posts created = this.postsRepo.save(post);
         PostResponse response = new PostResponse(created);
         List<CategoriesForm> catList = new ArrayList<>();
+
         for(Categories c:created.getCategories()) {
             catList.add(new CategoriesForm(c));
         }
@@ -90,8 +96,8 @@ public class PostServiceImpl implements PostService{
         if(!this.postsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No post found!", null, null);
         Posts post = this.postsRepo.getById(id);
         if(form.getTitle() != null) post.setTitle(form.getTitle());
-        if(form.getCategoriesLists() != null) {
-            List<Object> ints =  (List<Object>) this.propertyUtil.convertStringToList(form.getCategoriesLists(), ",");
+        if(form.getCategories() != null) {
+            List<Object> ints =  (List<Object>) this.propertyUtil.convertStringToList(form.getCategories(), ",");
             Set<Categories> categories = new HashSet<>();
             for(Object cid: ints) {
                 
@@ -121,14 +127,25 @@ public class PostServiceImpl implements PostService{
     public ResponseEntity<?> getPost(Integer id) {
         if(!this.postsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No post found!", null, null);
         Posts post = this.postsRepo.getById(id);
-        return Response.send(HttpStatus.OK, true, "Get post data success.", new PostResponse(post), null);
+        
+        PostResponse response = new PostResponse(post);
+        if(post.getComments() != null && post.getComments().size() > 0) {
+            List<CommentResponse> comList = new ArrayList<>();
+            for(Comments com:post.getComments()) {
+                comList.add(this.commentService.getCommentResponse(post.getId(), com.getId()));
+            }
+            response.setComments(comList);
+        }
+        
+        return Response.send(HttpStatus.OK, true, "Get post data success.",response, null);
     }
 
     @Override
     public ResponseEntity<?> getPosts(Boolean me) {
-        Users user = this.authService.authUser(null);
+        
         List<PostResponse> postList = new ArrayList<>();
         if(me != null && me) {
+            Users user = this.authService.authUser(null);
             for(Posts p: user.getPosts()) {
                 postList.add(new PostResponse(p));
             }
@@ -140,8 +157,17 @@ public class PostServiceImpl implements PostService{
         return Response.send(HttpStatus.OK, true, me != null && me ? "Get user post success":"Get all post success", postList, null);
     }
 
+    @SuppressWarnings("deprecation")
+    @Override
+    public ResponseEntity<?> deletePost(Integer id) {
+        if(!this.postsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No post found!", null, null);
+        Posts post = this.postsRepo.getById(id);
+        this.postsRepo.delete(post);
+        return Response.send(HttpStatus.ACCEPTED, true, "Delete Post success.", null, null);
+    }
+
     private boolean valideForm(PostForm form) {
-        return form.getTitle() != null && form.getDescription() != null && form.getCategoriesLists() != null;
+        return form.getTitle() != null && form.getDescription() != null && form.getCategories() != null;
     }
 
     private boolean checkImage(String dir) {

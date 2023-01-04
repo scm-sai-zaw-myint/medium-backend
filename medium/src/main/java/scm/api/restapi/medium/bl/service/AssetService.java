@@ -1,4 +1,4 @@
-package scm.api.restapi.medium.service;
+package scm.api.restapi.medium.bl.service;
 
 import jakarta.servlet.http.HttpServletResponse;
 

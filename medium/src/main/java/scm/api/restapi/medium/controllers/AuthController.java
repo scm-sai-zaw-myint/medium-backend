@@ -3,6 +3,7 @@ package scm.api.restapi.medium.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.micrometer.common.lang.Nullable;
 import jakarta.servlet.http.HttpSession;
+import scm.api.restapi.medium.bl.service.AuthService;
 import scm.api.restapi.medium.forms.UserForm;
 import scm.api.restapi.medium.forms.request.AuthRequestForm;
-import scm.api.restapi.medium.service.AuthService;
 
 @RestController
 @RequestMapping("/api/auth/")
@@ -38,4 +39,8 @@ public class AuthController {
         return authService.registration(form,access_token);
     }
     
+    @GetMapping("")
+    public ResponseEntity<?> getLoggedUserInfo(){
+        return this.authService.getUserInfo();
+    }
 }

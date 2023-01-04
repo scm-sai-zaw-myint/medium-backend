@@ -1,9 +1,11 @@
-package scm.api.restapi.medium.service.impl;
+package scm.api.restapi.medium.bl.service.impl;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,15 +20,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import scm.api.restapi.medium.bl.service.AuthService;
 import scm.api.restapi.medium.common.PropertyUtil;
 import scm.api.restapi.medium.common.Response;
 import scm.api.restapi.medium.forms.UserForm;
 import scm.api.restapi.medium.forms.reponse.AuthResponseForm;
+import scm.api.restapi.medium.forms.reponse.PostResponse;
+import scm.api.restapi.medium.forms.reponse.UserResponse;
 import scm.api.restapi.medium.forms.request.AuthRequestForm;
 import scm.api.restapi.medium.jwt.JWTUtil;
+import scm.api.restapi.medium.persistence.entiry.Posts;
 import scm.api.restapi.medium.persistence.entiry.Users;
 import scm.api.restapi.medium.persistence.repo.UsersRepo;
-import scm.api.restapi.medium.service.AuthService;
 
 @Transactional
 @Service
@@ -99,6 +104,20 @@ public class AuthServiceImpl implements AuthService{
                 : this.jwtUtil.getUserDetails(token);
         
         return this.usersRepo.getById(((Users) userDetails).getId());
+    }
+
+    @Override
+    public ResponseEntity<?> getUserInfo() {
+        Users user = this.authUser(null);
+        UserResponse response = new UserResponse(user);
+        if(user.getPosts() != null) {
+            Set<PostResponse> list = new HashSet<>();
+            for(Posts p:user.getPosts()) {
+                list.add(new PostResponse(p));
+            }
+            response.setPosts(list);
+        }
+        return Response.send(HttpStatus.OK, true, "Get user success", response, null);
     }
 
 }

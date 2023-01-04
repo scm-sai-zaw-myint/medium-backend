@@ -41,7 +41,7 @@ public class UserForm {
 
     public UserForm(Users user) {
         this.id = user.getId();
-        this.name = user.getName();
+        this.name = user.getUsername();
         this.email = user.getEmail();
         this.password = user.getPassword();
         this.bio = user.getBio();

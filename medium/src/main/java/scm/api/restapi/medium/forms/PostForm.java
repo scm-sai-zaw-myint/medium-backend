@@ -22,7 +22,7 @@ public class PostForm {
     
     private String imageURL;
     
-    private String categoriesLists;
+    private String categories;
     
     public PostForm(Posts post) {
         this.id = post.getId();

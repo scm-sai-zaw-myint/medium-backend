@@ -2,7 +2,6 @@ package scm.api.restapi.medium.persistence.entiry;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -10,7 +9,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,14 +16,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import scm.api.restapi.medium.forms.UserForm;
 
 @Entity
 @Table(name = "users")
 @Data
-@AllArgsConstructor
 public class Users implements UserDetails {
 
     /**
@@ -38,7 +34,7 @@ public class Users implements UserDetails {
     private Integer id;
     
     @Column(length = 50, unique = true)
-    private String name;
+    private String username;
 
     @Column(length = 50, unique = true)
     private String email;
@@ -49,7 +45,7 @@ public class Users implements UserDetails {
     @Column(nullable = true, length = 100)
     private String profile;
     
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user")
     private Set<Posts> posts;
     
     @OneToMany(mappedBy = "user")
@@ -68,11 +64,6 @@ public class Users implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
-    }
-
-    @Override
-    public String getUsername() {
         return null;
     }
 
@@ -101,7 +92,7 @@ public class Users implements UserDetails {
     }
 
     public Users(UserForm form) {
-        this.name = form.getName();
+        this.username = form.getName();
         this.email = form.getEmail();
         this.bio = form.getBio();
         this.profile = form.getProfileURL();

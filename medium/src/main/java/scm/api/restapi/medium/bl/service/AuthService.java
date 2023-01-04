@@ -1,4 +1,4 @@
-package scm.api.restapi.medium.service;
+package scm.api.restapi.medium.bl.service;
 
 import org.springframework.http.ResponseEntity;
 
@@ -13,5 +13,7 @@ public interface AuthService {
     public ResponseEntity<?> registration(UserForm form, String access_token);
     
     public Users authUser(String token);
+
+    public ResponseEntity<?> getUserInfo();
     
 }

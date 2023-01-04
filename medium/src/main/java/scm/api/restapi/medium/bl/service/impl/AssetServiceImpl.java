@@ -1,4 +1,4 @@
-package scm.api.restapi.medium.service.impl;
+package scm.api.restapi.medium.bl.service.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,8 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletResponse;
+import scm.api.restapi.medium.bl.service.AssetService;
 import scm.api.restapi.medium.common.Response;
-import scm.api.restapi.medium.service.AssetService;
 
 @Service
 public class AssetServiceImpl implements AssetService{

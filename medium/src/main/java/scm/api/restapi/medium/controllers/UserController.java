@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import scm.api.restapi.medium.bl.service.UserService;
 import scm.api.restapi.medium.forms.UserForm;
-import scm.api.restapi.medium.service.UserService;
 
 @RestController
 @RequestMapping("/api/user")

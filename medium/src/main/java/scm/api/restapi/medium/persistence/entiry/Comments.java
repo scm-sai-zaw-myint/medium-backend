@@ -14,15 +14,24 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import scm.api.restapi.medium.forms.CommentForm;
 
 @Entity
 @Table( name = "comments")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Comments {
+
+    public Comments(CommentForm form) {
+        this.id = form.getId();
+        this.parentCommentId = form.getParentCommentId();
+        this.body = form.getBody();
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

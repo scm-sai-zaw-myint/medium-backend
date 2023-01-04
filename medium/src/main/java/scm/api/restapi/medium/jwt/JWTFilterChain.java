@@ -33,7 +33,7 @@ public class JWTFilterChain extends OncePerRequestFilter{
         if(token == null) {
             token = request.getParameter("u_token");
         }
-        
+
         if (!jwtUtil.validateAccessToken(token)) {
             filterChain.doFilter(request, response);
             return;
@@ -60,7 +60,7 @@ public class JWTFilterChain extends OncePerRequestFilter{
                 new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
- 
+
     public UserDetails getUserDetails(String token) {
         Users userDetails = new Users();
         Claims claims = jwtUtil.parseClaims(token);
