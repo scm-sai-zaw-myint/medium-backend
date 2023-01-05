@@ -31,6 +31,11 @@ public class PostController {
         return this.postService.getPosts(me);
     }
     
+    @GetMapping("/latest")
+    public ResponseEntity<?> getLatestPosts(@Nullable@RequestParam Integer limit){
+        return this.postService.getLatestPosts(limit);
+    }
+    
     @RequestMapping(value = "/create", method = RequestMethod.POST, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<?> createPost(@ModelAttribute PostForm form,@Nullable@RequestParam String access_token){
         return this.postService.createPost(form,access_token);

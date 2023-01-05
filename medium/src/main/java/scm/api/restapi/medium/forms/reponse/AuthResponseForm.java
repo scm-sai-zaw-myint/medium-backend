@@ -19,4 +19,6 @@ public class AuthResponseForm {
     private String accessToken;
     @JsonInclude(Include.NON_NULL)
     private Date expiredIn;
+    @JsonInclude(Include.NON_NULL)
+    private UserResponse details;
 }

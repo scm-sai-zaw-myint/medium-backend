@@ -166,6 +166,17 @@ public class PostServiceImpl implements PostService{
         return Response.send(HttpStatus.ACCEPTED, true, "Delete Post success.", null, null);
     }
 
+    @Override
+    public ResponseEntity<?> getLatestPosts(Integer limit) {
+        limit = limit == null ? 3 : limit;
+        List<Posts> latest = this.postsRepo.getLatestPosts(limit);
+        List<PostResponse> responseList = new ArrayList<>();
+        for(Posts p:latest) {
+            responseList.add(new PostResponse(p));
+        }
+        return Response.send(HttpStatus.OK, true, "Get latest posts success.", responseList, null);
+    }
+
     private boolean valideForm(PostForm form) {
         return form.getTitle() != null && form.getDescription() != null && form.getCategories() != null;
     }

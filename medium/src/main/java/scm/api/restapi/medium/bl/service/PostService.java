@@ -16,4 +16,6 @@ public interface PostService {
 
     ResponseEntity<?> deletePost(Integer id);
 
+    ResponseEntity<?> getLatestPosts(Integer limit);
+
 }

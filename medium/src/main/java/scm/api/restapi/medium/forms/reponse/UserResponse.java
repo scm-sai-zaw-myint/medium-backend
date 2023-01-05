@@ -30,7 +30,7 @@ public class UserResponse {
     private String bio;
 
     @JsonInclude(Include.NON_NULL)
-    private String profileURL;
+    private String profile;
 
     @JsonInclude(Include.NON_NULL)
     private Date createdAt;
@@ -46,6 +46,6 @@ public class UserResponse {
         this.name = user.getUsername();
         this.bio = user.getBio();
         this.email = user.getEmail();
-        this.profileURL = server + "/assets/profile/" + user.getProfile();
+        this.profile = server + "/assets/profile/" + user.getProfile();
     }
 }
