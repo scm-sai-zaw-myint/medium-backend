@@ -20,11 +20,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import jakarta.transaction.Transactional;
 import scm.api.restapi.medium.bl.service.AuthService;
 import scm.api.restapi.medium.common.PropertyUtil;
 import scm.api.restapi.medium.common.Response;
+import scm.api.restapi.medium.common.Validator;
 import scm.api.restapi.medium.forms.PasswordForm;
 import scm.api.restapi.medium.forms.UserForm;
 import scm.api.restapi.medium.forms.reponse.AuthResponseForm;
@@ -86,7 +88,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<?> registration(UserForm form, String access_token) {
+    public ResponseEntity<?> registration(UserForm form, String access_token, BindingResult validator) {
+        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
         if(this.isCredentialExist(form)) return Response.send(HttpStatus.BAD_REQUEST, false, "Username or email already taken.", null, null);
         if (form.getProfile() != null) {
             try {
@@ -136,7 +139,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<?> changePassword(PasswordForm form, String access_token) {
+    public ResponseEntity<?> changePassword(PasswordForm form, String access_token, BindingResult validator) {
+        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
         Users user = this.authUser(access_token);
         Users checkUser = this.getUserLoginwithPassword(user.getEmail(), form.getCurrentPassword());
         if(checkUser == null)

@@ -5,6 +5,9 @@ import java.util.Date;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -23,12 +26,16 @@ public class UserForm {
     
     private Integer id;
 
+    @NotNull
     private String name;
 
+    @Email
     private String email;
 
     private String bio;
 
+    @NotNull
+    @Size(min = 6, max = 16)
     private String password;
     
     private MultipartFile profile;

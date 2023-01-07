@@ -10,11 +10,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import jakarta.transaction.Transactional;
 import scm.api.restapi.medium.bl.service.UserService;
 import scm.api.restapi.medium.common.PropertyUtil;
 import scm.api.restapi.medium.common.Response;
+import scm.api.restapi.medium.common.Validator;
 import scm.api.restapi.medium.forms.UserForm;
 import scm.api.restapi.medium.forms.reponse.PostResponse;
 import scm.api.restapi.medium.forms.reponse.UserResponse;
@@ -45,7 +47,8 @@ public class UserServiceImpl implements UserService{
 
     @SuppressWarnings("deprecation")
     @Override
-    public ResponseEntity<?> updateUser(Integer id, UserForm form) {
+    public ResponseEntity<?> updateUser(Integer id, UserForm form, BindingResult validator) {
+        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
         Users user = this.usersRepo.getById(id);
         if(user == null) return Response.send(HttpStatus.NO_CONTENT, false, "Success with empty data", user, null);
         if(form.getName() != null) user.setUsername(form.getName());

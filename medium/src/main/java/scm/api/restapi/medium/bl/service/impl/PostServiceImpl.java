@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import jakarta.transaction.Transactional;
 import scm.api.restapi.medium.bl.service.AuthService;
@@ -19,6 +20,7 @@ import scm.api.restapi.medium.bl.service.CommentService;
 import scm.api.restapi.medium.bl.service.PostService;
 import scm.api.restapi.medium.common.PropertyUtil;
 import scm.api.restapi.medium.common.Response;
+import scm.api.restapi.medium.common.Validator;
 import scm.api.restapi.medium.forms.CategoriesForm;
 import scm.api.restapi.medium.forms.PostForm;
 import scm.api.restapi.medium.forms.reponse.CommentResponse;
@@ -58,7 +60,8 @@ public class PostServiceImpl implements PostService{
     
     @SuppressWarnings({ "deprecation", "unchecked" })
     @Override
-    public ResponseEntity<?> createPost(PostForm form, String access_token) {
+    public ResponseEntity<?> createPost(PostForm form, String access_token, BindingResult validator) {
+        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
         if(!this.valideForm(form)) {
             return Response.send(HttpStatus.BAD_REQUEST, false, "Missing required fields!",null, null);
         }
@@ -96,7 +99,8 @@ public class PostServiceImpl implements PostService{
 
     @SuppressWarnings({ "deprecation", "unchecked" })
     @Override
-    public ResponseEntity<?> updatePost(Integer id, PostForm form) {
+    public ResponseEntity<?> updatePost(Integer id, PostForm form, BindingResult validator) {
+        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
         if(!this.postsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No post found!", null, null);
         Posts post = this.postsRepo.getById(id);
         if(form.getTitle() != null) post.setTitle(form.getTitle());

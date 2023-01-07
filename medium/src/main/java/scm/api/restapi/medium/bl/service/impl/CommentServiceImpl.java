@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import jakarta.transaction.Transactional;
 import scm.api.restapi.medium.bl.service.AuthService;
 import scm.api.restapi.medium.bl.service.CommentService;
 import scm.api.restapi.medium.common.Response;
+import scm.api.restapi.medium.common.Validator;
 import scm.api.restapi.medium.forms.CommentForm;
 import scm.api.restapi.medium.forms.reponse.CommentResponse;
 import scm.api.restapi.medium.persistence.entiry.Comments;
@@ -43,7 +45,8 @@ public class CommentServiceImpl implements CommentService{
 
     @SuppressWarnings("deprecation")
     @Override
-    public ResponseEntity<?> postComment(Integer pid, CommentForm form) {
+    public ResponseEntity<?> postComment(Integer pid, CommentForm form, BindingResult validator) {
+        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
         if(!this.validatePost(pid)) return Response.send(HttpStatus.NOT_FOUND, false, "No post found!", null, null);
         if(!this.validateCommentParent(form.getParentCommentId())) 
             return Response.send(HttpStatus.BAD_REQUEST, false, "Invalid reply! No parent comment found!", null, null);
@@ -69,7 +72,8 @@ public class CommentServiceImpl implements CommentService{
 
     @SuppressWarnings("deprecation")
     @Override
-    public ResponseEntity<?> updateComment(Integer pid, Integer id, CommentForm form) {
+    public ResponseEntity<?> updateComment(Integer pid, Integer id, CommentForm form, BindingResult validator) {
+        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
         if(!this.validatePost(pid)) return Response.send(HttpStatus.NOT_FOUND, false, "No post found!", null, null);
         if(!this.commentsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No comment found!", null, null);
         

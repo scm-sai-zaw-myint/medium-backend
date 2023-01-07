@@ -3,6 +3,7 @@ package scm.api.restapi.medium.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.micrometer.common.lang.Nullable;
+import jakarta.validation.Valid;
 import scm.api.restapi.medium.bl.service.PostService;
 import scm.api.restapi.medium.forms.PostForm;
 
@@ -37,8 +39,8 @@ public class PostController {
     }
     
     @RequestMapping(value = "/create", method = RequestMethod.POST, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<?> createPost(@ModelAttribute PostForm form,@Nullable@RequestParam String access_token){
-        return this.postService.createPost(form,access_token);
+    public ResponseEntity<?> createPost(@Valid@ModelAttribute PostForm form,BindingResult validator,@Nullable@RequestParam String access_token){
+        return this.postService.createPost(form,access_token,validator);
     }
     
     @GetMapping(value="/{id}")
@@ -47,8 +49,8 @@ public class PostController {
     }
     
     @PutMapping(value="/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<?> updatePost(@PathVariable Integer id,@ModelAttribute PostForm form){
-        return this.postService.updatePost(id, form);
+    public ResponseEntity<?> updatePost(@PathVariable Integer id,@Valid@ModelAttribute PostForm form,BindingResult validator){
+        return this.postService.updatePost(id, form,validator);
     }
     
     @DeleteMapping("/{id}")

@@ -96,6 +96,7 @@ public class JWTUtil {
         userDetails.setEmail(jwtSubject[1]);
         Users user = this.usersRepo.getById(id);
         if(!user.getIp().equals(claims.getId())) {
+            LOGGER.error("User logout or token revoke!", token);
             return null;
         }
         return userDetails;
