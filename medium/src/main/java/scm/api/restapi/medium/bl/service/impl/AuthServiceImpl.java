@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +18,17 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import scm.api.restapi.medium.bl.service.AuthService;
 import scm.api.restapi.medium.common.PropertyUtil;
 import scm.api.restapi.medium.common.Response;
+import scm.api.restapi.medium.forms.PasswordForm;
 import scm.api.restapi.medium.forms.UserForm;
 import scm.api.restapi.medium.forms.reponse.AuthResponseForm;
+import scm.api.restapi.medium.forms.reponse.PasswordResponse;
 import scm.api.restapi.medium.forms.reponse.PostResponse;
 import scm.api.restapi.medium.forms.reponse.UserResponse;
 import scm.api.restapi.medium.forms.request.AuthRequestForm;
@@ -54,6 +58,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     PropertyUtil propertyUtil;
+    
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     @Override
     public ResponseEntity<?> login(AuthRequestForm form, String access_token) {
@@ -70,7 +77,6 @@ public class AuthServiceImpl implements AuthService {
             AuthResponseForm response = new AuthResponseForm(user.getEmail(), accessToken,
                     new Date(System.currentTimeMillis() + (EXPIRE_DURATION * 60) * 1000), new UserResponse(user));
             return Response.send(HttpStatus.ACCEPTED, true, "Login success!", response, null);
-
         } catch (BadCredentialsException ex) {
             ex.printStackTrace();
             Map<String, Object> error = new HashMap<>();
@@ -81,6 +87,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<?> registration(UserForm form, String access_token) {
+        if(this.isCredentialExist(form)) return Response.send(HttpStatus.BAD_REQUEST, false, "Username or email already taken.", null, null);
         if (form.getProfile() != null) {
             try {
                 form.setProfileURL(this.propertyUtil.uploadPhotorequest(form.getProfile(), form.getEmail(), true));
@@ -90,9 +97,14 @@ public class AuthServiceImpl implements AuthService {
             }
         }
         Users user = new Users(form);
+        user.setIp(this.generateIpAddress());
         try {
             Users savedUser = usersRepo.save(user);
-            return Response.send(HttpStatus.CREATED, true, "Registration success!", savedUser, null);
+            
+            String accessToken = jwtUtil.generateAccessToken(user);
+            AuthResponseForm response = new AuthResponseForm(savedUser.getEmail(), accessToken,
+                    new Date(System.currentTimeMillis() + (EXPIRE_DURATION * 60) * 1000), new UserResponse(savedUser));
+            return Response.send(HttpStatus.CREATED, true, "Registration success!", response, null);
         } catch (Exception e) {
             e.printStackTrace();
             return Response.send(HttpStatus.BAD_REQUEST, false, e.getMessage(), e, null);
@@ -105,7 +117,7 @@ public class AuthServiceImpl implements AuthService {
         UserDetails userDetails = token == null
                 ? (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()
                 : this.jwtUtil.getUserDetails(token);
-
+        if(userDetails == null) return null;
         return this.usersRepo.getById(((Users) userDetails).getId());
     }
 
@@ -123,4 +135,52 @@ public class AuthServiceImpl implements AuthService {
         return Response.send(HttpStatus.OK, true, "Get user success", response, null);
     }
 
+    @Override
+    public ResponseEntity<?> changePassword(PasswordForm form, String access_token) {
+        Users user = this.authUser(access_token);
+        Users checkUser = this.getUserLoginwithPassword(user.getEmail(), form.getCurrentPassword());
+        if(checkUser == null)
+            return Response.send(HttpStatus.BAD_REQUEST, false, "Invalid current password!", null, null);
+        if(!form.getNewPassword().equals(form.getConfirmPassword()))
+            return Response.send(HttpStatus.BAD_REQUEST, false, "Password do not match!", null, null);
+        if(form.getCurrentPassword().equals(form.getNewPassword()))
+            return Response.send(HttpStatus.BAD_REQUEST, false, "Current password and new password must difference!", null, null);
+        user.setPassword(this.passwordEncoder.encode(form.getNewPassword()));
+        user.setIp(this.generateIpAddress());
+        Users updated = this.usersRepo.save(user);
+        String accessToken = jwtUtil.generateAccessToken(updated);
+        PasswordResponse pass = new PasswordResponse(accessToken, new Date(System.currentTimeMillis() + (EXPIRE_DURATION * 60) * 1000));
+        return Response.send(HttpStatus.OK, true, "Password reset success.", pass, null);
+    }
+
+    @Override
+    public ResponseEntity<?> logout() {
+        Users user = this.authUser(null);
+        user.setIp(this.generateIpAddress());
+        this.usersRepo.save(user);
+        return Response.send(HttpStatus.OK, true, "Logout success!", null, null);
+    }
+
+    private Users getUserLoginwithPassword(String email,String password) {
+        Users user = null;
+        try {
+        Authentication authentication = authManager
+                .authenticate(new UsernamePasswordAuthenticationToken(email, password));
+        user = (Users) authentication.getPrincipal();
+        }catch(BadCredentialsException ex) {
+            ex.printStackTrace();
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", ex.getMessage());
+        }
+       return user;
+    }
+    
+    private boolean isCredentialExist(UserForm form) {
+        return this.usersRepo.getUserBynameOrEmail(form.getName(), form.getEmail()) != null;
+    }
+    
+    private String generateIpAddress() {
+        Random r = new Random();
+        return r.nextInt(256)+"."+r.nextInt(256)+"."+r.nextInt(256)+"."+r.nextInt(256);
+    }
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.micrometer.common.lang.Nullable;
 import jakarta.servlet.http.HttpSession;
 import scm.api.restapi.medium.bl.service.AuthService;
+import scm.api.restapi.medium.forms.PasswordForm;
 import scm.api.restapi.medium.forms.UserForm;
 import scm.api.restapi.medium.forms.request.AuthRequestForm;
 
@@ -29,18 +30,29 @@ public class AuthController {
     @Autowired
     HttpSession session;
     
-    @PostMapping("login")
+    @PostMapping("/request/login")
     public ResponseEntity<?> login(@RequestBody AuthRequestForm form,@Nullable @RequestParam String access_token){
         return authService.login(form,access_token);
     }
     
-    @RequestMapping(value = "registration", method = RequestMethod.POST, consumes = { "multipart/form-data" })
+    @RequestMapping(value = "/request/registration", method = RequestMethod.POST, consumes = { "multipart/form-data" })
     public ResponseEntity<?> registration(@ModelAttribute UserForm form,@Nullable @RequestParam String access_token){
         return authService.registration(form,access_token);
+    }
+    
+    @PostMapping("/changepassword")
+    public ResponseEntity<?> changePassword(@RequestBody PasswordForm form,@Nullable @RequestParam String access_token){
+        return this.authService.changePassword(form,access_token);
     }
     
     @GetMapping("")
     public ResponseEntity<?> getLoggedUserInfo(){
         return this.authService.getUserInfo();
     }
+    
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(){
+        return this.authService.logout();
+    }
+    
 }

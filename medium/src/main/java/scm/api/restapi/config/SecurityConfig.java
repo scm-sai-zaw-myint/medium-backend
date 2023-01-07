@@ -62,7 +62,7 @@ public class SecurityConfig {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         
         http.authorizeHttpRequests()
-        .requestMatchers("/api/auth/**","/api/posts","/api/posts/**","/api/assets/image/**","/api/assets/profile/**").permitAll()
+        .requestMatchers("/api/auth/request/**","/api/posts","/api/posts/**","/api/assets/image/**","/api/assets/profile/**").permitAll()
         .anyRequest().authenticated();
         
         http.exceptionHandling().authenticationEntryPoint((request, response, ex) -> {

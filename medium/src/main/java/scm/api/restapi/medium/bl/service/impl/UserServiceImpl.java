@@ -2,6 +2,8 @@ package scm.api.restapi.medium.bl.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +16,9 @@ import scm.api.restapi.medium.bl.service.UserService;
 import scm.api.restapi.medium.common.PropertyUtil;
 import scm.api.restapi.medium.common.Response;
 import scm.api.restapi.medium.forms.UserForm;
+import scm.api.restapi.medium.forms.reponse.PostResponse;
 import scm.api.restapi.medium.forms.reponse.UserResponse;
+import scm.api.restapi.medium.persistence.entiry.Posts;
 import scm.api.restapi.medium.persistence.entiry.Users;
 import scm.api.restapi.medium.persistence.repo.UsersRepo;
 
@@ -47,19 +51,30 @@ public class UserServiceImpl implements UserService{
         if(form.getName() != null) user.setUsername(form.getName());
         if(form.getBio() != null) user.setBio(form.getBio());
         if(form.getEmail() != null) user.setEmail(form.getEmail());
-        if(form.getProfile() != null) {
-            try {
-                this.checkProfile(this.prfileStorageDIR+File.separator+user.getProfile());
-                
-                user.setProfile(this.propertyUtil.uploadPhotorequest(
-                        form.getProfile(), 
-                        form.getEmail() == null ? user.getEmail():form.getEmail(), 
-                                true));
-            } catch (IOException e) {
-                e.printStackTrace();
+        try {
+            if(form.getProfile() != null && form.getProfile().getBytes().length > 0) {
+                try {
+                    this.checkProfile(this.prfileStorageDIR+File.separator+user.getProfile());
+                    
+                    user.setProfile(this.propertyUtil.uploadPhotorequest(
+                            form.getProfile(), 
+                            form.getEmail() == null ? user.getEmail():form.getEmail(), 
+                                    true));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         UserResponse userResponse = new UserResponse(this.usersRepo.save(user));
+        if (user.getPosts() != null) {
+            Set<PostResponse> list = new HashSet<>();
+            for (Posts p : user.getPosts()) {
+                list.add(new PostResponse(p));
+            }
+            userResponse.setPosts(list);
+        }
         return Response.send(HttpStatus.ACCEPTED, true, "update User success", userResponse, null);
     }
 

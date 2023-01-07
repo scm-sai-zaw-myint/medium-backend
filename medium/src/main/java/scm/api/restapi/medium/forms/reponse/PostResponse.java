@@ -13,7 +13,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import scm.api.restapi.medium.forms.CategoriesForm;
 import scm.api.restapi.medium.persistence.entiry.Categories;
-import scm.api.restapi.medium.persistence.entiry.Comments;
 import scm.api.restapi.medium.persistence.entiry.Posts;
 
 @Data
@@ -54,8 +53,7 @@ public class PostResponse {
     private String image;
     @JsonInclude(Include.NON_NULL)
     private List<CategoriesForm> categories;
-    @JsonInclude(Include.NON_NULL)
-    private List<CommentResponse> comments;
+    private List<CommentResponse> comments = new ArrayList<>();
     @JsonInclude(Include.NON_NULL)
     private UserResponse user;
     @JsonInclude(Include.NON_NULL)

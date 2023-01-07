@@ -29,6 +29,7 @@ import scm.api.restapi.medium.persistence.entiry.Posts;
 import scm.api.restapi.medium.persistence.entiry.Users;
 import scm.api.restapi.medium.persistence.repo.CategoriesRepo;
 import scm.api.restapi.medium.persistence.repo.PostsRepo;
+import scm.api.restapi.medium.persistence.repo.UsersRepo;
 
 @Transactional
 @Service
@@ -39,6 +40,9 @@ public class PostServiceImpl implements PostService{
     
     @Autowired
     CategoriesRepo categoriesRepo;
+    
+    @Autowired
+    UsersRepo usersRepo;
     
     @Autowired
     AuthService authService;
@@ -108,15 +112,19 @@ public class PostServiceImpl implements PostService{
             post.setCategories(categories);
         }
         if(form.getDescription() != null) post.setDescription(form.getDescription());
-        if(form.getImage() != null) {
-            if(post.getImage()!=null) {
-                this.checkImage(this.imageStorageDIR+File.separator+post.getImage());
+        try {
+            if(form.getImage() != null && form.getImage().getBytes().length > 0) {
+                if(post.getImage()!=null) {
+                    this.checkImage(this.imageStorageDIR+File.separator+post.getImage());
+                }
+                try {
+                    post.setImage(this.propertyUtil.uploadPhotorequest(form.getImage(), form.getTitle(), false));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            try {
-                post.setImage(this.propertyUtil.uploadPhotorequest(form.getImage(), form.getTitle(), false));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         PostResponse response = new PostResponse(this.postsRepo.save(post));
         return Response.send(HttpStatus.ACCEPTED, true, "Update post success", response, null);
@@ -162,6 +170,12 @@ public class PostServiceImpl implements PostService{
     public ResponseEntity<?> deletePost(Integer id) {
         if(!this.postsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No post found!", null, null);
         Posts post = this.postsRepo.getById(id);
+        List<Categories> cat = this.categoriesRepo.findAll();
+        for(Categories c:cat) {
+            if(c.getPosts().contains(post)) {
+                c.getPosts().remove(post);
+            }
+        }
         this.postsRepo.delete(post);
         return Response.send(HttpStatus.ACCEPTED, true, "Delete Post success.", null, null);
     }

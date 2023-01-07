@@ -15,6 +15,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.Data;
 import scm.api.restapi.medium.forms.UserForm;
@@ -54,12 +55,17 @@ public class Users implements UserDetails {
     @Column(length = 100)
     private String password;
     
+    @Column(length = 100)
+    private String ip;
+    
     @Column(name = "created_at")
     @CreationTimestamp
+    
     private Date createdAt;
     
     @Column(name = "updated_at")
     @UpdateTimestamp
+    @OrderBy("DESC")
     private Date updatedAt;
 
     @Override

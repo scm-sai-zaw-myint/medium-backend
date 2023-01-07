@@ -46,6 +46,7 @@ public class UserResponse {
         this.name = user.getUsername();
         this.bio = user.getBio();
         this.email = user.getEmail();
+        if(user.getProfile()!=null)
         this.profile = server + "/assets/profile/" + user.getProfile();
     }
 }

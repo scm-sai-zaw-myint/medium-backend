@@ -28,12 +28,17 @@ public class JWTFilterChain extends OncePerRequestFilter{
                 HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        //skip filter for auth
+        if(request.getRequestURI().startsWith("/api/auth/request")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         String token = getAccessToken(request);
  
         if(token == null) {
             token = request.getParameter("u_token");
         }
-
+        
         if (!jwtUtil.validateAccessToken(token)) {
             filterChain.doFilter(request, response);
             return;
