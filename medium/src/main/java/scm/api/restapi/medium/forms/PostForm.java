@@ -25,12 +25,13 @@ public class PostForm {
     @Size(min = 100, max = 1600)
     private String description;
     
+    @NotNull
     private MultipartFile image;
     
     private String imageURL;
     
     @NotNull
-    @Pattern(regexp = "^[0-9]+(?:,[0-9]+)*$")
+    @Pattern(regexp = "^[0-9]+(?:,[0-9]+)*$",message="Invalid cateogry")
     private String categories;
     
     public PostForm(Posts post) {

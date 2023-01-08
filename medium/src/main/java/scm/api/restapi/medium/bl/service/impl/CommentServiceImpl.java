@@ -133,7 +133,11 @@ public class CommentServiceImpl implements CommentService{
         List<Comments> com = this.commentsRepo.findChildComments(id);
         List<CommentResponse> response = new ArrayList<>();
         for(Comments c:com) {
-            response.add(new CommentResponse(c));
+            CommentResponse childResponse = new CommentResponse(c);
+            response.add(childResponse);
+            if(this.commentsRepo.findChildComments(c.getId()).size() > 0) {
+                childResponse.setChildComments(this.getChildComments(c.getId()));
+            }
         }
         return response;
     }

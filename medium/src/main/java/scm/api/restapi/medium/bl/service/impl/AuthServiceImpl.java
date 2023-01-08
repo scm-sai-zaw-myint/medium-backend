@@ -65,7 +65,8 @@ public class AuthServiceImpl implements AuthService {
     PasswordEncoder passwordEncoder;
 
     @Override
-    public ResponseEntity<?> login(AuthRequestForm form, String access_token) {
+    public ResponseEntity<?> login(AuthRequestForm form, String access_token,BindingResult validator) {
+        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
         if (form == null)
             return Response.send(HttpStatus.BAD_REQUEST, false, "Request body required!", null, null);
         if (form.getEmail() == null || form.getPassword() == null)

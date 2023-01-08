@@ -13,11 +13,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import scm.api.restapi.medium.bl.service.UserService;
 import scm.api.restapi.medium.common.PropertyUtil;
 import scm.api.restapi.medium.common.Response;
 import scm.api.restapi.medium.common.Validator;
-import scm.api.restapi.medium.forms.UserForm;
+import scm.api.restapi.medium.forms.ProfileUpdateForm;
 import scm.api.restapi.medium.forms.reponse.PostResponse;
 import scm.api.restapi.medium.forms.reponse.UserResponse;
 import scm.api.restapi.medium.persistence.entiry.Posts;
@@ -47,13 +48,12 @@ public class UserServiceImpl implements UserService{
 
     @SuppressWarnings("deprecation")
     @Override
-    public ResponseEntity<?> updateUser(Integer id, UserForm form, BindingResult validator) {
+    public ResponseEntity<?> updateUser(Integer id,@Valid ProfileUpdateForm form, BindingResult validator) {
         if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
         Users user = this.usersRepo.getById(id);
         if(user == null) return Response.send(HttpStatus.NO_CONTENT, false, "Success with empty data", user, null);
         if(form.getName() != null) user.setUsername(form.getName());
         if(form.getBio() != null) user.setBio(form.getBio());
-        if(form.getEmail() != null) user.setEmail(form.getEmail());
         try {
             if(form.getProfile() != null && form.getProfile().getBytes().length > 0) {
                 try {
@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService{
                     
                     user.setProfile(this.propertyUtil.uploadPhotorequest(
                             form.getProfile(), 
-                            form.getEmail() == null ? user.getEmail():form.getEmail(), 
+                            user.getEmail(), 
                                     true));
                 } catch (IOException e) {
                     e.printStackTrace();

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import scm.api.restapi.medium.bl.service.UserService;
-import scm.api.restapi.medium.forms.UserForm;
+import scm.api.restapi.medium.forms.ProfileUpdateForm;
 
 @RestController
 @RequestMapping("/api/user")
@@ -29,7 +29,7 @@ public class UserController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Integer id,@Valid@ModelAttribute UserForm form,BindingResult validator){
+    public ResponseEntity<?> updateUser(@PathVariable Integer id,@Valid@ModelAttribute ProfileUpdateForm form,BindingResult validator){
         return this.userService.updateUser(id,form,validator);
     }
 }

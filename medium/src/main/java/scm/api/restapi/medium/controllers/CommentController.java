@@ -41,7 +41,7 @@ public class CommentController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateComment(@PathVariable Integer pid,@Valid@PathVariable Integer id,BindingResult validator,@RequestBody CommentForm form){
+    public ResponseEntity<?> updateComment(@PathVariable Integer pid,@PathVariable Integer id,@Valid@RequestBody CommentForm form,BindingResult validator){
         return this.commentService.updateComment(pid,id,form,validator);
     }
     

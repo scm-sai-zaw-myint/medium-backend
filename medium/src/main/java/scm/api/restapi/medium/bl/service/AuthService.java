@@ -10,7 +10,7 @@ import scm.api.restapi.medium.persistence.entiry.Users;
 
 public interface AuthService {
 
-    public ResponseEntity<?> login(AuthRequestForm form, String access_token);
+    public ResponseEntity<?> login(AuthRequestForm form, String access_token, BindingResult validator);
 
     public ResponseEntity<?> registration(UserForm form, String access_token, BindingResult validator);
     

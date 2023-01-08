@@ -34,7 +34,7 @@ public class AuthController {
     
     @PostMapping("/request/login")
     public ResponseEntity<?> login(@Valid@RequestBody AuthRequestForm form,BindingResult validator,@Nullable @RequestParam String access_token){
-        return authService.login(form,access_token);
+        return authService.login(form,access_token,validator);
     }
     
     @RequestMapping(value = "/request/registration", method = RequestMethod.POST, consumes = { "multipart/form-data" })
