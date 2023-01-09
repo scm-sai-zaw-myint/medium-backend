@@ -19,4 +19,6 @@ public interface PostService {
 
     ResponseEntity<?> getLatestPosts(Integer limit);
 
+    ResponseEntity<?> searchPost(String search);
+
 }

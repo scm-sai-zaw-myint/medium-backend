@@ -12,4 +12,6 @@ public interface PostsRepo extends JpaRepository<Posts, Integer>{
     @Query(value = "SELECT * FROM Posts as p ORDER BY p.created_at DESC LIMIT ?1",nativeQuery = true)
     List<Posts> getLatestPosts(Integer limit);
   
+    @Query(value = "SELECT * FROM Posts as p WHERE p.title LIKE %:search% OR p.description LIKE %:search% ORDER BY p.updated_at DESC", nativeQuery = true)
+    List<Posts> searchPosts(String search);
 }

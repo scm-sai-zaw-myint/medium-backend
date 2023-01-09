@@ -195,6 +195,16 @@ public class PostServiceImpl implements PostService{
         return Response.send(HttpStatus.OK, true, "Get latest posts success.", responseList, null);
     }
 
+    @Override
+    public ResponseEntity<?> searchPost(String search) {
+        List<Posts> posts = this.postsRepo.searchPosts(search);
+        List<PostResponse> responseList = new ArrayList<>();
+        for(Posts p:posts) {
+            responseList.add(new PostResponse(p));
+        }
+        return Response.send(HttpStatus.OK, true, "Search posts success.", responseList, null);
+    }
+
     private boolean valideForm(PostForm form) {
         return form.getTitle() != null && form.getDescription() != null && form.getCategories() != null;
     }

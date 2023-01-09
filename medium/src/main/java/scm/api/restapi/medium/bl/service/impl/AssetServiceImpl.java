@@ -36,7 +36,9 @@ public class AssetServiceImpl implements AssetService{
         String imgType = name.substring(name.lastIndexOf(".")+1,name.length());
         imgType = imgType == "svg"?imgType+"+xml":imgType;
         response.setContentType("image/"+imgType);
-        return IOUtils.toByteArray(in);
+        byte[] bytes = IOUtils.toByteArray(in);
+        in.close();
+        return bytes;
         }catch(Exception e) {
             e.printStackTrace();
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -55,7 +57,9 @@ public class AssetServiceImpl implements AssetService{
         try {
         InputStream in = new FileInputStream(f);
         response.setContentType(MediaType.IMAGE_JPEG_VALUE);
-        return IOUtils.toByteArray(in);
+        byte[] bytes = IOUtils.toByteArray(in);
+        in.close();
+        return bytes;
         }catch(Exception e) {
             e.printStackTrace();
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);

@@ -43,6 +43,11 @@ public class PostController {
         return this.postService.createPost(form,access_token,validator);
     }
     
+    @GetMapping("/search")
+    public ResponseEntity<?> searchPost(@RequestParam String search){
+        return this.postService.searchPost(search);
+    }
+    
     @GetMapping(value="/{id}")
     public ResponseEntity<?> getPost(@PathVariable Integer id){
         return this.postService.getPost(id);
