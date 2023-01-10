@@ -30,6 +30,7 @@ import scm.api.restapi.medium.persistence.entiry.Comments;
 import scm.api.restapi.medium.persistence.entiry.Posts;
 import scm.api.restapi.medium.persistence.entiry.Users;
 import scm.api.restapi.medium.persistence.repo.CategoriesRepo;
+import scm.api.restapi.medium.persistence.repo.CommentsRepo;
 import scm.api.restapi.medium.persistence.repo.PostsRepo;
 import scm.api.restapi.medium.persistence.repo.UsersRepo;
 
@@ -54,6 +55,9 @@ public class PostServiceImpl implements PostService{
     
     @Autowired
     PropertyUtil propertyUtil;
+    
+    @Autowired
+    CommentsRepo commentRepo;
     
     @Value("${image.upload-dir}")
     private String imageStorageDIR;
@@ -179,6 +183,9 @@ public class PostServiceImpl implements PostService{
             if(c.getPosts().contains(post)) {
                 c.getPosts().remove(post);
             }
+        }
+        for(Comments com:post.getComments()) {
+            this.commentService.deleteComment(post.getId(), com.getId());
         }
         this.postsRepo.delete(post);
         return Response.send(HttpStatus.ACCEPTED, true, "Delete Post success.", null, null);

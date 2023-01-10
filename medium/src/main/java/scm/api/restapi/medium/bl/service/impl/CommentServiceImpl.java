@@ -113,7 +113,6 @@ public class CommentServiceImpl implements CommentService{
             Integer nid = c.getId();
             this.commentsRepo.delete(c);
             this.deleted ++;
-            
             if(this.commentsRepo.findChildComments(nid).size() > 0) {
                 //recursive action
                 this.deleteHierarchicalComment(nid);
