@@ -42,8 +42,16 @@ public class UserServiceImpl implements UserService{
     @Override
     public ResponseEntity<?> getUserById(Integer id) {
         Users user = this.usersRepo.getById(id);
-        if(user == null) return Response.send(HttpStatus.NO_CONTENT, false, "Success with empty data", user, null);
-        return Response.send(HttpStatus.ACCEPTED, true, "Get user data success", new UserResponse(user), null);
+        UserResponse response =  new UserResponse(user);
+        if(user == null) return Response.send(HttpStatus.ACCEPTED, false, "Success with empty data", user, null);
+        if (user.getPosts() != null) {
+            Set<PostResponse> list = new HashSet<>();
+            for (Posts p : user.getPosts()) {
+                list.add(new PostResponse(p));
+            }
+            response.setPosts(list);
+        }
+        return Response.send(HttpStatus.ACCEPTED, true, "Get user data success", response, null);
     }
 
     @SuppressWarnings("deprecation")
