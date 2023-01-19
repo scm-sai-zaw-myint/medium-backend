@@ -18,11 +18,13 @@ import jakarta.transaction.Transactional;
 import scm.api.restapi.medium.bl.service.AuthService;
 import scm.api.restapi.medium.bl.service.CommentService;
 import scm.api.restapi.medium.bl.service.PostService;
+import scm.api.restapi.medium.common.Pagination;
 import scm.api.restapi.medium.common.PropertyUtil;
 import scm.api.restapi.medium.common.Response;
 import scm.api.restapi.medium.common.Validator;
 import scm.api.restapi.medium.forms.CategoriesForm;
 import scm.api.restapi.medium.forms.PostForm;
+import scm.api.restapi.medium.forms.PostUpdateForm;
 import scm.api.restapi.medium.forms.reponse.CommentResponse;
 import scm.api.restapi.medium.forms.reponse.PostResponse;
 import scm.api.restapi.medium.persistence.entiry.Categories;
@@ -62,12 +64,15 @@ public class PostServiceImpl implements PostService{
     @Value("${image.upload-dir}")
     private String imageStorageDIR;
     
+    @Value("${app.pagination.limit}")
+    private Integer limit;
+    
     @SuppressWarnings({ "deprecation", "unchecked" })
     @Override
     public ResponseEntity<?> createPost(PostForm form, String access_token, BindingResult validator) {
-        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
+        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null, null);
         if(!this.valideForm(form)) {
-            return Response.send(HttpStatus.BAD_REQUEST, false, "Missing required fields!",null, null);
+            return Response.send(HttpStatus.BAD_REQUEST, false, "Missing required fields!",null, null, null);
         }
         if(form.getImage() != null ) {
             try {
@@ -98,21 +103,20 @@ public class PostServiceImpl implements PostService{
             catList.add(new CategoriesForm(c));
         }
         response.setCategories(catList);
-        return Response.send(HttpStatus.CREATED, true, "Create post success!", response, null);
+        return Response.send(HttpStatus.CREATED, true, "Create post success!", response, null, null);
     }
 
     @SuppressWarnings({ "deprecation", "unchecked" })
     @Override
-    public ResponseEntity<?> updatePost(Integer id, PostForm form, BindingResult validator) {
-        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
-        if(!this.postsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No post found!", null, null);
+    public ResponseEntity<?> updatePost(Integer id, PostUpdateForm form, BindingResult validator) {
+        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null, null);
+        if(!this.postsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No post found!", null, null, null);
         Posts post = this.postsRepo.getById(id);
         if(form.getTitle() != null) post.setTitle(form.getTitle());
         if(form.getCategories() != null) {
             List<Object> ints =  (List<Object>) this.propertyUtil.convertStringToList(form.getCategories(), ",");
             Set<Categories> categories = new HashSet<>();
             for(Object cid: ints) {
-                
                 Integer cateId = cid instanceof String ? Integer.parseInt((String) cid) : cid instanceof Integer ? (Integer) cid :  (Integer) cid;
                 Categories cat = this.categoriesRepo.getById(cateId);
                 categories.add(cat);
@@ -135,13 +139,13 @@ public class PostServiceImpl implements PostService{
             e.printStackTrace();
         }
         PostResponse response = new PostResponse(this.postsRepo.save(post));
-        return Response.send(HttpStatus.ACCEPTED, true, "Update post success", response, null);
+        return Response.send(HttpStatus.ACCEPTED, true, "Update post success", response, null, null);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public ResponseEntity<?> getPost(Integer id) {
-        if(!this.postsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No post found!", null, null);
+        if(!this.postsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No post found!", null, null, null);
         Posts post = this.postsRepo.getById(id);
         
         PostResponse response = new PostResponse(post);
@@ -153,11 +157,11 @@ public class PostServiceImpl implements PostService{
             response.setComments(comList);
         }
         
-        return Response.send(HttpStatus.OK, true, "Get post data success.",response, null);
+        return Response.send(HttpStatus.OK, true, "Get post data success.",response, null, null);
     }
 
     @Override
-    public ResponseEntity<?> getPosts(Boolean me) {
+    public ResponseEntity<?> getPosts(Boolean me, Integer page) {
         
         List<PostResponse> postList = new ArrayList<>();
         if(me != null && me) {
@@ -170,13 +174,15 @@ public class PostServiceImpl implements PostService{
                 postList.add(new PostResponse(p));
             }
         }
-        return Response.send(HttpStatus.OK, true, me != null && me ? "Get user post success":"Get all post success", postList, null);
+        page = page == null ? 1 : page;
+        Pagination pagination = new Pagination(postList, page, limit,"posts");
+        return Response.send(HttpStatus.OK, true, me != null && me ? "Get user post success":"Get all post success", pagination.getData(), null, pagination);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public ResponseEntity<?> deletePost(Integer id) {
-        if(!this.postsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No post found!", null, null);
+        if(!this.postsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No post found!", null, null, null);
         Posts post = this.postsRepo.getById(id);
         List<Categories> cat = this.categoriesRepo.findAll();
         for(Categories c:cat) {
@@ -188,7 +194,7 @@ public class PostServiceImpl implements PostService{
             this.commentService.deleteComment(post.getId(), com.getId());
         }
         this.postsRepo.delete(post);
-        return Response.send(HttpStatus.ACCEPTED, true, "Delete Post success.", null, null);
+        return Response.send(HttpStatus.ACCEPTED, true, "Delete Post success.", null, null, null);
     }
 
     @Override
@@ -199,17 +205,20 @@ public class PostServiceImpl implements PostService{
         for(Posts p:latest) {
             responseList.add(new PostResponse(p));
         }
-        return Response.send(HttpStatus.OK, true, "Get latest posts success.", responseList, null);
+        return Response.send(HttpStatus.OK, true, "Get latest posts success.", responseList, null, null);
     }
 
     @Override
-    public ResponseEntity<?> searchPost(String search) {
+    public ResponseEntity<?> searchPost(String search, Integer page) {
         List<Posts> posts = this.postsRepo.searchPosts(search);
         List<PostResponse> responseList = new ArrayList<>();
         for(Posts p:posts) {
             responseList.add(new PostResponse(p));
         }
-        return Response.send(HttpStatus.OK, true, "Search posts success.", responseList, null);
+        page = page == null ? 1 : page;
+        Pagination pagination = new Pagination(responseList, page, limit,"posts");
+        
+        return Response.send(HttpStatus.OK, true, "Search posts success.", pagination.getData(), null, pagination);
     }
 
     private boolean valideForm(PostForm form) {

@@ -19,6 +19,7 @@ import io.micrometer.common.lang.Nullable;
 import jakarta.validation.Valid;
 import scm.api.restapi.medium.bl.service.PostService;
 import scm.api.restapi.medium.forms.PostForm;
+import scm.api.restapi.medium.forms.PostUpdateForm;
 
 @CrossOrigin
 @RestController
@@ -29,8 +30,8 @@ public class PostController {
     PostService postService;
     
     @GetMapping
-    public ResponseEntity<?> getPosts(@Nullable@RequestParam Boolean me){
-        return this.postService.getPosts(me);
+    public ResponseEntity<?> getPosts(@Nullable@RequestParam Boolean me,@Nullable@RequestParam Integer page){
+        return this.postService.getPosts(me,page);
     }
     
     @GetMapping("/latest")
@@ -44,8 +45,8 @@ public class PostController {
     }
     
     @GetMapping("/search")
-    public ResponseEntity<?> searchPost(@RequestParam String search){
-        return this.postService.searchPost(search);
+    public ResponseEntity<?> searchPost(@RequestParam String search,@Nullable@RequestParam Integer page){
+        return this.postService.searchPost(search, page);
     }
     
     @GetMapping(value="/{id}")
@@ -54,7 +55,7 @@ public class PostController {
     }
     
     @PutMapping(value="/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<?> updatePost(@PathVariable Integer id,@Valid@ModelAttribute PostForm form,BindingResult validator){
+    public ResponseEntity<?> updatePost(@PathVariable Integer id,@Valid@ModelAttribute PostUpdateForm form,BindingResult validator){
         return this.postService.updatePost(id, form,validator);
     }
     

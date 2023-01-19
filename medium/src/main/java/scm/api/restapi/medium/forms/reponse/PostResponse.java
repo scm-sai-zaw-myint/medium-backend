@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import scm.api.restapi.medium.common.PropertyUtil;
 import scm.api.restapi.medium.forms.CategoriesForm;
 import scm.api.restapi.medium.persistence.entiry.Categories;
 import scm.api.restapi.medium.persistence.entiry.Posts;
@@ -34,6 +35,7 @@ public class PostResponse {
         this.user= new UserResponse(p.getUser());
         this.createdAt = p.getCreatedAt();
         this.updatedAt = p.getUdpatedAt();
+        this.time = PropertyUtil.diffforhuman(updatedAt);
     }
 
     private void putCategories(Set<Categories> categories) {
@@ -60,5 +62,6 @@ public class PostResponse {
     private Date createdAt;
     @JsonInclude(Include.NON_NULL)
     private Date updatedAt;
-    
+    @JsonInclude(Include.NON_NULL)
+    private String time;
 }

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import scm.api.restapi.medium.common.Pagination;
 import scm.api.restapi.medium.persistence.entiry.Users;
 
 @Data
@@ -40,6 +41,9 @@ public class UserResponse {
 
     @JsonInclude(Include.NON_NULL)
     private Set<PostResponse> posts;
+    
+    @JsonInclude(Include.NON_NULL)
+    private Pagination pagination;
     
     public UserResponse(Users user) {
         this.id = user.getId();

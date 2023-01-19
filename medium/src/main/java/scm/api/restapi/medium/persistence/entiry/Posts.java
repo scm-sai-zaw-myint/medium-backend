@@ -52,7 +52,7 @@ public class Posts {
     @OneToMany(mappedBy = "post")
     Set<Comments> comments;
 
-    @Column(length = 30)
+    @Column(length = 130)
     private String title;
 
     @Column(columnDefinition = "TEXT")

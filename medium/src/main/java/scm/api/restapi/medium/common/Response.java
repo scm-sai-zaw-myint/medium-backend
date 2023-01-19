@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 
 public class Response {
 
-    public static ResponseEntity<?> send(HttpStatus status,boolean ok,String message, Object body, HttpHeaders headers){
+    public static ResponseEntity<?> send(HttpStatus status,boolean ok,String message, Object body, HttpHeaders headers, Object pagination){
         Map<String, Object> response = new HashMap<>();
         response.put("code", status.value());
         response.put("ok", ok);
@@ -21,6 +21,8 @@ public class Response {
             headers = new HttpHeaders();
             headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         }
+        if(pagination != null)
+            response.put("pagination", pagination);
         return ResponseEntity.status(status).headers(headers).body(response);
     }
     

@@ -30,19 +30,29 @@ public class CategoryServiceImpl implements CategoryService{
         for(Categories c:cat) {
             responseList.add(new CategoryResponse(c.getId(), c.getName()));
         }
-        return Response.send(HttpStatus.OK, true, "Get categories success", responseList, null);
+        return Response.send(HttpStatus.OK, true, "Get categories success", responseList, null, null);
+    }
+
+    @Override
+    public ResponseEntity<?> getUsedCategories() {
+        List<Categories> cat = this.categoriesRepo.getAllUsedCategories();
+        List<CategoryResponse> responseList = new ArrayList<>();
+        for(Categories c:cat) {
+            responseList.add(new CategoryResponse(c.getId(), c.getName()));
+        }
+        return Response.send(HttpStatus.OK, true, "Get categories success", responseList, null, null);
     }
 
     @Override
     public ResponseEntity<?> getRelatedPosts(String name) {
         Categories category = this.categoriesRepo.getCategoryByName(name);
-        if(category == null) return Response.send(HttpStatus.BAD_REQUEST, false, "No category match", category, null);
+        if(category == null) return Response.send(HttpStatus.BAD_REQUEST, false, "No category match", category, null, null);
         Set<Posts> posts = category.getPosts();
         List<PostResponse> response = new ArrayList<>();
         for(Posts p :posts) {
             response.add(new PostResponse(p));
         }
-        return Response.send(HttpStatus.OK, true, "Get related posts success.", response, null);
+        return Response.send(HttpStatus.OK, true, "Get related posts success.", response, null, null);
     }
     
 }

@@ -7,10 +7,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ocpsoft.prettytime.PrettyTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +30,8 @@ public class PropertyUtil {
     
     @Value("${profile.upload-dir}")
     private String profileStorageDIR;
+    
+    private static final PrettyTime pretty = new PrettyTime();
     
     public static String eToJson(Throwable e,int code) {
         Map<String, Object> error = new HashMap<>();
@@ -61,6 +65,10 @@ public class PropertyUtil {
         Files.copy(file.getInputStream(), upload,StandardCopyOption.REPLACE_EXISTING);
         return filename;
         
+    }
+    
+    public static String diffforhuman(Date date) {
+        return pretty.format(date);
     }
     
 }

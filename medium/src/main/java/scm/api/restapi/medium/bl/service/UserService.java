@@ -7,8 +7,8 @@ import scm.api.restapi.medium.forms.ProfileUpdateForm;
 
 public interface UserService {
 
-    ResponseEntity<?> getUserById(Integer id);
+    ResponseEntity<?> getUserById(Integer id, Integer page);
 
-    ResponseEntity<?> updateUser(Integer id, ProfileUpdateForm form, BindingResult validator);
+    ResponseEntity<?> updateUser(Integer id, ProfileUpdateForm form, BindingResult validator, Integer page);
 
 }

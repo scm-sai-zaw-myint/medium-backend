@@ -46,10 +46,10 @@ public class CommentServiceImpl implements CommentService{
     @SuppressWarnings("deprecation")
     @Override
     public ResponseEntity<?> postComment(Integer pid, CommentForm form, BindingResult validator) {
-        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
-        if(!this.validatePost(pid)) return Response.send(HttpStatus.NOT_FOUND, false, "No post found!", null, null);
+        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null, null);
+        if(!this.validatePost(pid)) return Response.send(HttpStatus.NOT_FOUND, false, "No post found!", null, null, null);
         if(!this.validateCommentParent(form.getParentCommentId())) 
-            return Response.send(HttpStatus.BAD_REQUEST, false, "Invalid reply! No parent comment found!", null, null);
+            return Response.send(HttpStatus.BAD_REQUEST, false, "Invalid reply! No parent comment found!", null, null, null);
         form.setId(null);
         Users user = this.authService.authUser(null);
         Posts post = this.postsRepo.getById(pid);
@@ -59,38 +59,38 @@ public class CommentServiceImpl implements CommentService{
         comment.setUser(user);
         Comments saved = this.commentsRepo.save(comment);
         
-        return Response.send(HttpStatus.OK, true, "Post comment success.", new CommentResponse(saved), null);
+        return Response.send(HttpStatus.OK, true, "Post comment success.", new CommentResponse(saved), null, null);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public ResponseEntity<?> getComment(Integer id) {
-        if(!this.commentsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No comment found!", null, null);
+        if(!this.commentsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No comment found!", null, null, null);
         Comments com = this.commentsRepo.getById(id);
-        return Response.send(HttpStatus.OK, true, "Get comment success.", this.getCommentResponse(com), null);
+        return Response.send(HttpStatus.OK, true, "Get comment success.", this.getCommentResponse(com), null, null);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public ResponseEntity<?> updateComment(Integer pid, Integer id, CommentForm form, BindingResult validator) {
-        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
-        if(!this.validatePost(pid)) return Response.send(HttpStatus.NOT_FOUND, false, "No post found!", null, null);
-        if(!this.commentsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No comment found!", null, null);
+        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null, null);
+        if(!this.validatePost(pid)) return Response.send(HttpStatus.NOT_FOUND, false, "No post found!", null, null, null);
+        if(!this.commentsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No comment found!", null, null, null);
         
         form.setId(null);
         Comments com = this.commentsRepo.getById(id);
         if(form.getBody()!=null) com.setBody(form.getBody());
         Comments updated = this.commentsRepo.save(com);
-        return Response.send(HttpStatus.ACCEPTED, true, "Update Comment success.", this.getCommentResponse(updated), null);
+        return Response.send(HttpStatus.ACCEPTED, true, "Update Comment success.", this.getCommentResponse(updated), null, null);
     }
 
     @Override
     public ResponseEntity<?> deleteComment(Integer pid, Integer id) {
-        if(!this.validatePost(pid)) return Response.send(HttpStatus.NOT_FOUND, false, "No post found!", null, null);
-        if(!this.commentsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No comment found!", null, null);
+        if(!this.validatePost(pid)) return Response.send(HttpStatus.NOT_FOUND, false, "No post found!", null, null, null);
+        if(!this.commentsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No comment found!", null, null, null);
         this.deleted = 0;
         Integer count = this.deleteHierarchicalComment(id);
-        return Response.send(HttpStatus.ACCEPTED, true, "Total "+count+" comments deleted.", null, null);
+        return Response.send(HttpStatus.ACCEPTED, true, "Total "+count+" comments deleted.", null, null, null);
     }
 
     @SuppressWarnings("deprecation")

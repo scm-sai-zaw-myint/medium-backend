@@ -23,6 +23,11 @@ public class CategoryController {
         return this.categoryService.getAllCategories();
     }
     
+    @GetMapping("/used")
+    public ResponseEntity<?> getUsedCategories(){
+        return this.categoryService.getUsedCategories();
+    }
+    
     @GetMapping("/{name}/posts")
     public ResponseEntity<?> relatedPosts(@PathVariable String name){
         return this.categoryService.getRelatedPosts(name);

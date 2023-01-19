@@ -66,11 +66,11 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<?> login(AuthRequestForm form, String access_token,BindingResult validator) {
-        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
+        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null, null);
         if (form == null)
-            return Response.send(HttpStatus.BAD_REQUEST, false, "Request body required!", null, null);
+            return Response.send(HttpStatus.BAD_REQUEST, false, "Request body required!", null, null, null);
         if (form.getEmail() == null || form.getPassword() == null)
-            return Response.send(HttpStatus.BAD_REQUEST, false, "Email or password required!", null, null);
+            return Response.send(HttpStatus.BAD_REQUEST, false, "Email or password required!", null, null, null);
         try {
             Authentication authentication = authManager
                     .authenticate(new UsernamePasswordAuthenticationToken(form.getEmail(), form.getPassword()));
@@ -79,25 +79,25 @@ public class AuthServiceImpl implements AuthService {
             String accessToken = jwtUtil.generateAccessToken(user);
             AuthResponseForm response = new AuthResponseForm(user.getEmail(), accessToken,
                     new Date(System.currentTimeMillis() + (EXPIRE_DURATION * 60) * 1000), new UserResponse(user));
-            return Response.send(HttpStatus.ACCEPTED, true, "Login success!", response, null);
+            return Response.send(HttpStatus.ACCEPTED, true, "Login success!", response, null, null);
         } catch (BadCredentialsException ex) {
             ex.printStackTrace();
             Map<String, Object> error = new HashMap<>();
             error.put("error", ex.getMessage());
-            return Response.send(HttpStatus.BAD_REQUEST, false, "Login fail!", error, null);
+            return Response.send(HttpStatus.BAD_REQUEST, false, "Login fail!", error, null, null);
         }
     }
 
     @Override
     public ResponseEntity<?> registration(UserForm form, String access_token, BindingResult validator) {
-        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
-        if(this.isCredentialExist(form)) return Response.send(HttpStatus.BAD_REQUEST, false, "Username or email already taken.", null, null);
+        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null, null);
+        if(this.isCredentialExist(form)) return Response.send(HttpStatus.BAD_REQUEST, false, "Username or email already taken.", null, null, null);
         if (form.getProfile() != null) {
             try {
                 form.setProfileURL(this.propertyUtil.uploadPhotorequest(form.getProfile(), form.getEmail(), true));
             } catch (IOException e) {
                 e.printStackTrace();
-                return Response.send(HttpStatus.INTERNAL_SERVER_ERROR, false, e.getMessage(), e, null);
+                return Response.send(HttpStatus.INTERNAL_SERVER_ERROR, false, e.getMessage(), e, null, null);
             }
         }
         Users user = new Users(form);
@@ -108,10 +108,10 @@ public class AuthServiceImpl implements AuthService {
             String accessToken = jwtUtil.generateAccessToken(user);
             AuthResponseForm response = new AuthResponseForm(savedUser.getEmail(), accessToken,
                     new Date(System.currentTimeMillis() + (EXPIRE_DURATION * 60) * 1000), new UserResponse(savedUser));
-            return Response.send(HttpStatus.CREATED, true, "Registration success!", response, null);
+            return Response.send(HttpStatus.CREATED, true, "Registration success!", response, null, null);
         } catch (Exception e) {
             e.printStackTrace();
-            return Response.send(HttpStatus.BAD_REQUEST, false, e.getMessage(), e, null);
+            return Response.send(HttpStatus.BAD_REQUEST, false, e.getMessage(), e, null, null);
         }
     }
 
@@ -136,26 +136,26 @@ public class AuthServiceImpl implements AuthService {
             }
             response.setPosts(list);
         }
-        return Response.send(HttpStatus.OK, true, "Get user success", response, null);
+        return Response.send(HttpStatus.OK, true, "Get user success", response, null, null);
     }
 
     @Override
     public ResponseEntity<?> changePassword(PasswordForm form, String access_token, BindingResult validator) {
-        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null);
+        if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null, null);
         Users user = this.authUser(access_token);
         Users checkUser = this.getUserLoginwithPassword(user.getEmail(), form.getCurrentPassword());
         if(checkUser == null)
-            return Response.send(HttpStatus.BAD_REQUEST, false, "Invalid current password!", null, null);
+            return Response.send(HttpStatus.BAD_REQUEST, false, "Invalid current password!", null, null, null);
         if(!form.getNewPassword().equals(form.getConfirmPassword()))
-            return Response.send(HttpStatus.BAD_REQUEST, false, "Password do not match!", null, null);
+            return Response.send(HttpStatus.BAD_REQUEST, false, "Password do not match!", null, null, null);
         if(form.getCurrentPassword().equals(form.getNewPassword()))
-            return Response.send(HttpStatus.BAD_REQUEST, false, "Current password and new password must difference!", null, null);
+            return Response.send(HttpStatus.BAD_REQUEST, false, "Current password and new password must difference!", null, null, null);
         user.setPassword(this.passwordEncoder.encode(form.getNewPassword()));
         user.setIp(this.generateIpAddress());
         Users updated = this.usersRepo.save(user);
         String accessToken = jwtUtil.generateAccessToken(updated);
         PasswordResponse pass = new PasswordResponse(accessToken, new Date(System.currentTimeMillis() + (EXPIRE_DURATION * 60) * 1000));
-        return Response.send(HttpStatus.OK, true, "Password reset success.", pass, null);
+        return Response.send(HttpStatus.OK, true, "Password reset success.", pass, null, null);
     }
 
     @Override
@@ -163,7 +163,7 @@ public class AuthServiceImpl implements AuthService {
         Users user = this.authUser(null);
         user.setIp(this.generateIpAddress());
         this.usersRepo.save(user);
-        return Response.send(HttpStatus.OK, true, "Logout success!", null, null);
+        return Response.send(HttpStatus.OK, true, "Logout success!", null, null, null);
     }
 
     private Users getUserLoginwithPassword(String email,String password) {

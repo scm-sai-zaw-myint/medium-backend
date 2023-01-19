@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
 import scm.api.restapi.medium.forms.PostForm;
+import scm.api.restapi.medium.forms.PostUpdateForm;
 
 public interface PostService {
 
@@ -11,14 +12,14 @@ public interface PostService {
 
     ResponseEntity<?> getPost(Integer id);
     
-    ResponseEntity<?> updatePost(Integer id, PostForm form, BindingResult validator);
+    ResponseEntity<?> updatePost(Integer id, PostUpdateForm form, BindingResult validator);
 
-    ResponseEntity<?> getPosts(Boolean me);
+    ResponseEntity<?> getPosts(Boolean me, Integer page);
 
     ResponseEntity<?> deletePost(Integer id);
 
     ResponseEntity<?> getLatestPosts(Integer limit);
 
-    ResponseEntity<?> searchPost(String search);
+    ResponseEntity<?> searchPost(String search, Integer page);
 
 }

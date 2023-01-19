@@ -28,7 +28,7 @@ public class AssetServiceImpl implements AssetService{
         File f = new File(this.getImageURL(name));
         if(!f.exists()) {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            return Response.send(HttpStatus.NOT_FOUND, false, "No image found!", null, null);
+            return Response.send(HttpStatus.NOT_FOUND, false, "No image found!", null, null, null);
         }
         try {
         InputStream in = new FileInputStream(f);
@@ -42,7 +42,7 @@ public class AssetServiceImpl implements AssetService{
         }catch(Exception e) {
             e.printStackTrace();
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            return Response.send(HttpStatus.INTERNAL_SERVER_ERROR, false, "Unexpect error occoured!", e, null);
+            return Response.send(HttpStatus.INTERNAL_SERVER_ERROR, false, "Unexpect error occoured!", e, null, null);
         }
     }
 
@@ -52,7 +52,7 @@ public class AssetServiceImpl implements AssetService{
         File f = new File(this.getProfileURL(name));
         if(!f.exists()) {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            return Response.send(HttpStatus.NOT_FOUND, false, "No image found!", null, null);
+            return Response.send(HttpStatus.NOT_FOUND, false, "No image found!", null, null, null);
         }
         try {
         InputStream in = new FileInputStream(f);
@@ -63,7 +63,7 @@ public class AssetServiceImpl implements AssetService{
         }catch(Exception e) {
             e.printStackTrace();
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            return Response.send(HttpStatus.INTERNAL_SERVER_ERROR, false, "Unexpect error occoured!", e, null);
+            return Response.send(HttpStatus.INTERNAL_SERVER_ERROR, false, "Unexpect error occoured!", e, null, null);
         }
     }
 
