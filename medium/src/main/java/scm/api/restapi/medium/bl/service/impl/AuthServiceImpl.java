@@ -144,12 +144,21 @@ public class AuthServiceImpl implements AuthService {
         if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null, null);
         Users user = this.authUser(access_token);
         Users checkUser = this.getUserLoginwithPassword(user.getEmail(), form.getCurrentPassword());
-        if(checkUser == null)
-            return Response.send(HttpStatus.BAD_REQUEST, false, "Invalid current password!", null, null, null);
-        if(!form.getNewPassword().equals(form.getConfirmPassword()))
-            return Response.send(HttpStatus.BAD_REQUEST, false, "Password do not match!", null, null, null);
-        if(form.getCurrentPassword().equals(form.getNewPassword()))
-            return Response.send(HttpStatus.BAD_REQUEST, false, "Current password and new password must difference!", null, null, null);
+        if(checkUser == null) {
+            Map<String, Object> errors= new HashMap<>();
+            errors.put("currentPassword", "Invalid current password!");
+            return Response.send(HttpStatus.BAD_REQUEST, false, "Invalid current password!", errors, null, null);
+        }
+        if(!form.getNewPassword().equals(form.getConfirmPassword())) {
+            Map<String, Object> errors= new HashMap<>();
+            errors.put("confirmPassword", "Password do not match!");
+            return Response.send(HttpStatus.BAD_REQUEST, false, "Password do not match!", errors, null, null);
+        }
+        if(form.getCurrentPassword().equals(form.getNewPassword())) {
+            Map<String, Object> errors= new HashMap<>();
+            errors.put("newPassword", "Current password and new password must difference!");
+            return Response.send(HttpStatus.BAD_REQUEST, false, "Current password and new password must difference!", errors, null, null);
+        }
         user.setPassword(this.passwordEncoder.encode(form.getNewPassword()));
         user.setIp(this.generateIpAddress());
         Users updated = this.usersRepo.save(user);
