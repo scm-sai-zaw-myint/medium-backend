@@ -50,6 +50,7 @@ public class Posts {
     Set<Categories> categories;
 
     @OneToMany(mappedBy = "post")
+    @OrderBy("updated_at DESC")
     Set<Comments> comments;
 
     @Column(length = 130)

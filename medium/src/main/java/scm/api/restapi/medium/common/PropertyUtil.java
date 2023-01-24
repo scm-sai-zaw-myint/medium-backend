@@ -64,7 +64,6 @@ public class PropertyUtil {
         Path upload = Paths.get(f.getAbsolutePath()).toAbsolutePath().normalize().resolve(filename);
         Files.copy(file.getInputStream(), upload,StandardCopyOption.REPLACE_EXISTING);
         return filename;
-        
     }
     
     public static String diffforhuman(Date date) {

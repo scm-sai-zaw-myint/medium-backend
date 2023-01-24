@@ -47,9 +47,11 @@ public class Users implements UserDetails {
     private String profile;
     
     @OneToMany(mappedBy = "user")
+    @OrderBy("updated_at DESC")
     private Set<Posts> posts;
     
     @OneToMany(mappedBy = "user")
+    @OrderBy("updated_at DESC")
     private Set<Comments> comments;
     
     @Column(length = 100)

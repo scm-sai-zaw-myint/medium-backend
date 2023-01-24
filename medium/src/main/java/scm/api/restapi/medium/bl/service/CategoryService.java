@@ -8,6 +8,6 @@ public interface CategoryService {
 
     ResponseEntity<?> getUsedCategories();
     
-    ResponseEntity<?> getRelatedPosts(String id);
+    ResponseEntity<?> getRelatedPosts(String id, Integer page);
 
 }

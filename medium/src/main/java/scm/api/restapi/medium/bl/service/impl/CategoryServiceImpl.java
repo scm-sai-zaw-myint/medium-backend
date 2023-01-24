@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import scm.api.restapi.medium.bl.service.CategoryService;
+import scm.api.restapi.medium.common.Pagination;
 import scm.api.restapi.medium.common.Response;
 import scm.api.restapi.medium.forms.reponse.CategoryResponse;
 import scm.api.restapi.medium.forms.reponse.PostResponse;
@@ -23,6 +25,9 @@ public class CategoryServiceImpl implements CategoryService{
     @Autowired
     private CategoriesRepo categoriesRepo;
 
+    @Value("${app.pagination.limit}")
+    private Integer limit;
+    
     @Override
     public ResponseEntity<?> getAllCategories() {
         List<Categories> cat = this.categoriesRepo.findAll();
@@ -44,15 +49,19 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
-    public ResponseEntity<?> getRelatedPosts(String name) {
+    public ResponseEntity<?> getRelatedPosts(String name, Integer page) {
         Categories category = this.categoriesRepo.getCategoryByName(name);
         if(category == null) return Response.send(HttpStatus.BAD_REQUEST, false, "No category match", category, null, null);
         Set<Posts> posts = category.getPosts();
+        List<Posts> allPosts = new ArrayList<>();
+        allPosts.addAll(posts);
         List<PostResponse> response = new ArrayList<>();
-        for(Posts p :posts) {
-            response.add(new PostResponse(p));
+        page = page == null ? 1 : page;
+        for(Object p :posts) {
+            response.add(new PostResponse((Posts) p));
         }
-        return Response.send(HttpStatus.OK, true, "Get related posts success.", response, null, null);
+        Pagination pagination = new Pagination(response, page, limit, "posts");
+        return Response.send(HttpStatus.OK, true, "Get related posts success.", pagination.getData(), null, pagination);
     }
     
 }

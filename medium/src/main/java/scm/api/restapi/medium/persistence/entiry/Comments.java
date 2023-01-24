@@ -46,10 +46,12 @@ public class Comments {
     
     @ManyToOne
     @JoinColumn(name = "post_id",nullable = false)
+    @OrderBy("updated_at DESC")
     private Posts post;
     
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @OrderBy("updated_at DESC")
     private Users user;
     
     @Column( name = "created_at")

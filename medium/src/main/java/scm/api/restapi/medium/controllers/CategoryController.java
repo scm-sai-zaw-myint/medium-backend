@@ -6,8 +6,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.micrometer.common.lang.Nullable;
 import scm.api.restapi.medium.bl.service.CategoryService;
 
 @RestController
@@ -29,8 +31,8 @@ public class CategoryController {
     }
     
     @GetMapping("/{name}/posts")
-    public ResponseEntity<?> relatedPosts(@PathVariable String name){
-        return this.categoryService.getRelatedPosts(name);
+    public ResponseEntity<?> relatedPosts(@PathVariable String name,@Nullable@RequestParam Integer page){
+        return this.categoryService.getRelatedPosts(name, page);
     }
     
 }

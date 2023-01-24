@@ -33,6 +33,7 @@ public class Categories {
     private String name;
     
     @ManyToMany(mappedBy = "categories")
+    @OrderBy("updated_at DESC")
     Set<Posts> posts;
     
     @Column( name = "created_at")
@@ -41,7 +42,6 @@ public class Categories {
     
     @Column( name = "updated_at" )
     @UpdateTimestamp
-    @OrderBy("DESC")
     private Date udpatedAt;
     
 }
