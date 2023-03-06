@@ -1,6 +1,7 @@
 package scm.api.restapi.medium.bl.service;
 
 import org.springframework.http.ResponseEntity;
+import scm.api.restapi.medium.forms.CategoriesForm;
 
 public interface CategoryService {
 
@@ -10,4 +11,5 @@ public interface CategoryService {
     
     ResponseEntity<?> getRelatedPosts(String id, Integer page);
 
+    ResponseEntity<?> createCategory(CategoriesForm categoryDto);
 }

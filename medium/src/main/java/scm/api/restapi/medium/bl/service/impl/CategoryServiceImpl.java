@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import scm.api.restapi.medium.bl.service.CategoryService;
 import scm.api.restapi.medium.common.Pagination;
 import scm.api.restapi.medium.common.Response;
+import scm.api.restapi.medium.forms.CategoriesForm;
 import scm.api.restapi.medium.forms.reponse.CategoryResponse;
 import scm.api.restapi.medium.forms.reponse.PostResponse;
 import scm.api.restapi.medium.persistence.entiry.Categories;
@@ -63,5 +64,13 @@ public class CategoryServiceImpl implements CategoryService{
         Pagination pagination = new Pagination(response, page, limit, "posts");
         return Response.send(HttpStatus.OK, true, "Get related posts success.", pagination.getData(), null, pagination);
     }
-    
+
+    @Override
+    public ResponseEntity<?> createCategory(CategoriesForm categoryDto) {
+        Categories category = new Categories();
+        category.setName(categoryDto.getName());
+        Categories saved = this.categoriesRepo.save(category);
+        return Response.send(HttpStatus.OK, true, "Create category success", saved, null, null);
+    }
+
 }

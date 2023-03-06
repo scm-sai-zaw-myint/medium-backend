@@ -27,7 +27,7 @@ public class CommentController {
     
     @GetMapping("")
     public ResponseEntity<?> getComments(@PathVariable Integer pid){
-        return this.commentService.getComments();
+        return this.commentService.getComment(pid);
     }
 
     @PostMapping("")

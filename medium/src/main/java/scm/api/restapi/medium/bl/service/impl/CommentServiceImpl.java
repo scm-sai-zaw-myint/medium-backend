@@ -36,18 +36,12 @@ public class CommentServiceImpl implements CommentService{
     private PostsRepo postsRepo;
     
     private Integer deleted = 0;
-    
-    @Override
-    public ResponseEntity<?> getComments() {
-        
-        return null;
-    }
 
     @SuppressWarnings("deprecation")
     @Override
     public ResponseEntity<?> postComment(Integer pid, CommentForm form, BindingResult validator) {
         if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null, null);
-        if(!this.validatePost(pid)) return Response.send(HttpStatus.NOT_FOUND, false, "No post found!", null, null, null);
+        if(this.validatePost(pid)) return Response.send(HttpStatus.NOT_FOUND, false, "No post found!", null, null, null);
         if(!this.validateCommentParent(form.getParentCommentId())) 
             return Response.send(HttpStatus.BAD_REQUEST, false, "Invalid reply! No parent comment found!", null, null, null);
         form.setId(null);
@@ -74,7 +68,7 @@ public class CommentServiceImpl implements CommentService{
     @Override
     public ResponseEntity<?> updateComment(Integer pid, Integer id, CommentForm form, BindingResult validator) {
         if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null, null);
-        if(!this.validatePost(pid)) return Response.send(HttpStatus.NOT_FOUND, false, "No post found!", null, null, null);
+        if(this.validatePost(pid)) return Response.send(HttpStatus.NOT_FOUND, false, "No post found!", null, null, null);
         if(!this.commentsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No comment found!", null, null, null);
         
         form.setId(null);
@@ -86,7 +80,7 @@ public class CommentServiceImpl implements CommentService{
 
     @Override
     public ResponseEntity<?> deleteComment(Integer pid, Integer id) {
-        if(!this.validatePost(pid)) return Response.send(HttpStatus.NOT_FOUND, false, "No post found!", null, null, null);
+        if(this.validatePost(pid)) return Response.send(HttpStatus.NOT_FOUND, false, "No post found!", null, null, null);
         if(!this.commentsRepo.existsById(id)) return Response.send(HttpStatus.BAD_REQUEST, false, "No comment found!", null, null, null);
         this.deleted = 0;
         Integer count = this.deleteHierarchicalComment(id);
@@ -96,7 +90,7 @@ public class CommentServiceImpl implements CommentService{
     @SuppressWarnings("deprecation")
     @Override
     public CommentResponse getCommentResponse(Integer pid,Integer id) {
-        if(!this.validatePost(pid) || !this.commentsRepo.existsById(id)) return null;
+        if(this.validatePost(pid) || !this.commentsRepo.existsById(id)) return null;
         Comments com = this.commentsRepo.getById(id);
         return this.getCommentResponse(com);
     }
@@ -113,7 +107,7 @@ public class CommentServiceImpl implements CommentService{
             Integer nid = c.getId();
             this.commentsRepo.delete(c);
             this.deleted ++;
-            if(this.commentsRepo.findChildComments(nid).size() > 0) {
+            if(!this.commentsRepo.findChildComments(nid).isEmpty()) {
                 //recursive action
                 this.deleteHierarchicalComment(nid);
             }
@@ -134,7 +128,7 @@ public class CommentServiceImpl implements CommentService{
         for(Comments c:com) {
             CommentResponse childResponse = new CommentResponse(c);
             response.add(childResponse);
-            if(this.commentsRepo.findChildComments(c.getId()).size() > 0) {
+            if(!this.commentsRepo.findChildComments(c.getId()).isEmpty()) {
                 childResponse.setChildComments(this.getChildComments(c.getId()));
             }
         }
@@ -142,7 +136,7 @@ public class CommentServiceImpl implements CommentService{
     }
 
     private boolean validatePost(Integer pid) {
-        return this.postsRepo.existsById(pid);
+        return !this.postsRepo.existsById(pid);
     }
     
     private boolean validateCommentParent(Integer parentId) {

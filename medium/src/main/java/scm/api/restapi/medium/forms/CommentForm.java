@@ -12,12 +12,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommentForm {
-
     private Integer id;
     @NotNull
     @Size(min = 1, max = 1000)
     private String body;
-    
     private Integer parentCommentId;
-    
 }

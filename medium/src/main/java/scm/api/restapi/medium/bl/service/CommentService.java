@@ -8,8 +8,6 @@ import scm.api.restapi.medium.forms.reponse.CommentResponse;
 
 public interface CommentService {
 
-    ResponseEntity<?> getComments();
-
     ResponseEntity<?> postComment(Integer pid, CommentForm form, BindingResult validator);
 
     ResponseEntity<?> getComment(Integer id);

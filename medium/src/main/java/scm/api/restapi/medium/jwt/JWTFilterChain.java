@@ -50,7 +50,7 @@ public class JWTFilterChain extends OncePerRequestFilter{
 
     private String getAccessToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
-        if(header == null) return null;
+        if(header == null || !header.contains(" ")) return null;
         String token = header.split(" ")[1].trim();
         return token;
     }
