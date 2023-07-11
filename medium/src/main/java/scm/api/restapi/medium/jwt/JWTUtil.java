@@ -79,6 +79,8 @@ public class JWTUtil {
             LOGGER.error("Signature validation failed");
         }
         return false;
+
+
     }
     
     public String getSubject(String token) {

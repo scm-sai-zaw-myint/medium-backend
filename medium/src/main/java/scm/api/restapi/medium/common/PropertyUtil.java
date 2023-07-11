@@ -6,11 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.ocpsoft.prettytime.PrettyTime;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,6 +64,11 @@ public class PropertyUtil {
     
     public static String diffforhuman(Date date) {
         return pretty.format(date);
+    }
+
+    public static String generateIpAddress() {
+        Random r = new Random();
+        return r.nextInt(256)+"."+r.nextInt(256)+"."+r.nextInt(256)+"."+r.nextInt(256);
     }
     
 }

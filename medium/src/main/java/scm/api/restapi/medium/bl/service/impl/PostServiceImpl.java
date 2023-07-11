@@ -47,9 +47,6 @@ public class PostServiceImpl implements PostService{
     CategoriesRepo categoriesRepo;
     
     @Autowired
-    UsersRepo usersRepo;
-    
-    @Autowired
     AuthService authService;
     
     @Autowired
@@ -71,7 +68,7 @@ public class PostServiceImpl implements PostService{
     @Override
     public ResponseEntity<?> createPost(PostForm form, String access_token, BindingResult validator) {
         if(validator.hasErrors()) return Response.send(HttpStatus.BAD_REQUEST, false, "Bad request!", Validator.parseErrorMessage(validator), null, null);
-        if(!this.valideForm(form)) {
+        if(!this.validateForm(form)) {
             return Response.send(HttpStatus.BAD_REQUEST, false, "Missing required fields!",null, null, null);
         }
         if(form.getImage() != null ) {
@@ -129,11 +126,7 @@ public class PostServiceImpl implements PostService{
                 if(post.getImage()!=null) {
                     this.checkImage(this.imageStorageDIR+File.separator+post.getImage());
                 }
-                try {
-                    post.setImage(this.propertyUtil.uploadPhotorequest(form.getImage(), form.getTitle(), false));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                post.setImage(this.propertyUtil.uploadPhotorequest(form.getImage(), form.getTitle(), false));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -149,7 +142,7 @@ public class PostServiceImpl implements PostService{
         Posts post = this.postsRepo.getById(id);
         
         PostResponse response = new PostResponse(post);
-        if(post.getComments() != null && post.getComments().size() > 0) {
+        if(post.getComments() != null && !post.getComments().isEmpty()) {
             List<CommentResponse> comList = new ArrayList<>();
             for(Comments com:post.getComments()) {
                 comList.add(this.commentService.getCommentResponse(post.getId(), com.getId()));
@@ -186,9 +179,7 @@ public class PostServiceImpl implements PostService{
         Posts post = this.postsRepo.getById(id);
         List<Categories> cat = this.categoriesRepo.findAll();
         for(Categories c:cat) {
-            if(c.getPosts().contains(post)) {
-                c.getPosts().remove(post);
-            }
+            c.getPosts().remove(post);
         }
         for(Comments com:post.getComments()) {
             this.commentService.deleteComment(post.getId(), com.getId());
@@ -221,7 +212,7 @@ public class PostServiceImpl implements PostService{
         return Response.send(HttpStatus.OK, true, "Search posts success.", pagination.getData(), null, pagination);
     }
 
-    private boolean valideForm(PostForm form) {
+    private boolean validateForm(PostForm form) {
         return form.getTitle() != null && form.getDescription() != null && form.getCategories() != null;
     }
 
